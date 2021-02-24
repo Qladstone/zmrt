@@ -9,6 +9,11 @@ import java.util.*;
 @Component
 public class RouteSearcher {
     public List<Route> searchForRoutes(String origin, String destination, LocalDateTime startDateTime) {
+        StationLinesForDay stationLines = constructStationLines(startDateTime);
+        return searchForRoutesInLines(origin, destination, stationLines);
+    }
+
+    private StationLinesForDay constructStationLines(LocalDateTime startDateTime) {
         StationLinesForDay stationLines = new StationLinesForDay();
         if (!startDateTime.isBefore(LocalDateTime.of(1988, 3, 12, 0, 0))) {
             stationLines.addStation("Redhill", StationCode.of("EW18"));
@@ -18,7 +23,10 @@ public class RouteSearcher {
             stationLines.addStation("Yew Tee", StationCode.of("NS5"));
             stationLines.addStation("Kranji", StationCode.of("NS7"));
         }
+        return stationLines;
+    }
 
+    private List<Route> searchForRoutesInLines(String origin, String destination, StationLinesForDay stationLines) {
         List<Route> routesFound = new ArrayList<>();
 
         if (!stationLines.containsStationName(origin) || !stationLines.containsStationName(destination)) {
