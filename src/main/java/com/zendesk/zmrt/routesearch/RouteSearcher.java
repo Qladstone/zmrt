@@ -14,6 +14,10 @@ public class RouteSearcher {
             stationLines.addStation("Redhill", StationCode.of("EW18"));
             stationLines.addStation("Tiong Bahru", StationCode.of("EW17"));
         }
+        if (!startDateTime.isBefore(LocalDateTime.of(1996, 2, 10, 0, 0))) {
+            stationLines.addStation("Yew Tee", StationCode.of("NS5"));
+            stationLines.addStation("Kranji", StationCode.of("NS7"));
+        }
 
         List<Route> routesFound = new ArrayList<>();
 
