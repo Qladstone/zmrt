@@ -1,19 +1,26 @@
 package com.zendesk.zmrt;
 
-import com.zendesk.zmrt.payload.Route;
 import com.zendesk.zmrt.payload.RoutesResponseBody;
+import com.zendesk.zmrt.routesearch.Route;
+import com.zendesk.zmrt.routesearch.RouteSearcher;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.inject.Inject;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 public class Controller {
+
+    private final RouteSearcher routeSearcher;
+
+    @Inject
+    public Controller(RouteSearcher routeSearcher) {
+        this.routeSearcher = routeSearcher;
+    }
 
     @GetMapping("/")
     public String index() {
@@ -25,14 +32,7 @@ public class Controller {
                                      @RequestParam("destination") String destination,
                                      @RequestParam("start-datetime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                                                  LocalDateTime startDateTime) {
-        List<Route> routesFound = new ArrayList<>();
-        if (!startDateTime.isBefore(LocalDateTime.of(1988, 3, 12, 0, 0))
-                && Objects.equals(origin, "Redhill") && Objects.equals(destination, "Tiong Bahru")) {
-            List<String> sequence = new ArrayList<>();
-            sequence.add("EW18");
-            sequence.add("EW17");
-            routesFound.add(new Route(sequence));
-        }
+        List<Route> routesFound = routeSearcher.searchForRoutes(origin, destination, startDateTime);
         return new RoutesResponseBody(routesFound);
     }
 }
