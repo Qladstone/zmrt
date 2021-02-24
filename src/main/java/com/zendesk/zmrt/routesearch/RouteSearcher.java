@@ -20,10 +20,12 @@ public class RouteSearcher {
         if (!startDateTime.isBefore(LocalDateTime.of(1988, 3, 12, 0, 0))) {
             stationLines.addStation("Redhill", StationCode.of("EW18"));
             stationLines.addStation("Tiong Bahru", StationCode.of("EW17"));
+            stationLines.addStation("Jurong East", StationCode.of("EW24"));
         }
         if (!startDateTime.isBefore(LocalDateTime.of(1996, 2, 10, 0, 0))) {
             stationLines.addStation("Yew Tee", StationCode.of("NS5"));
             stationLines.addStation("Kranji", StationCode.of("NS7"));
+            stationLines.addStation("Jurong East", StationCode.of("NS1"));
         }
         return stationLines;
     }
