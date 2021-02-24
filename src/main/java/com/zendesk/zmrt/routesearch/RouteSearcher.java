@@ -1,6 +1,8 @@
 package com.zendesk.zmrt.routesearch;
 
+import com.zendesk.zmrt.routesearch.RouteSearchGraph.Solution;
 import com.zendesk.zmrt.routesearch.StationLinesForDay.StationCode;
+import com.zendesk.zmrt.routesearch.StationLinesForDay.StationInLine;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -27,32 +29,77 @@ public class RouteSearcher {
     }
 
     private List<Route> searchForRoutesInLines(String origin, String destination, StationLinesForDay stationLines) {
-        List<Route> routesFound = new ArrayList<>();
-
         if (!stationLines.containsStationName(origin) || !stationLines.containsStationName(destination)) {
-            return routesFound;
+            return Collections.emptyList();
         }
+        RouteSearchGraph graph = constructGraph(stationLines);
+        List<Solution> solutions = graph.goalSearch(origin, destination);
+        return constructRoutesFromSolutions(solutions, stationLines);
+    }
 
-        Set<String> commonPrefixes = commonPrefixesOf(origin, destination, stationLines);
-        if (!commonPrefixes.isEmpty()) {
-            String commonPrefix = commonPrefixes.stream().findAny().get();
-            List<String> sequence = new ArrayList<>();
-            sequence.add(stationLines
-                    .getStationCodeOfStationNameWithPrefix(origin, commonPrefix)
-                    .toStationCodeString());
-            sequence.add(stationLines
-                    .getStationCodeOfStationNameWithPrefix(destination, commonPrefix)
-                    .toStationCodeString());
-            routesFound.add(new Route(sequence));
+    private RouteSearchGraph constructGraph(StationLinesForDay stationLines) {
+        RouteSearchGraph graph = new RouteSearchGraph();
+        for (String stationPrefix : stationLines.getStationPrefixes()) {
+            List<StationInLine> stations = stationLines.getStationsOfLine(stationPrefix);
+            String sJ = stations.get(0).getStationName();
+            graph.addVertex(sJ);
+            for (int p = 1; p < stations.size(); p++) {
+                String sI = sJ;
+                sJ = stations.get(p).getStationName();
+                graph.addVertex(sJ);
+                graph.addEdge(sI, sJ);
+            }
+        }
+        return graph;
+    }
+
+    private List<Route> constructRoutesFromSolutions(List<Solution> solutions, StationLinesForDay stationLines) {
+        List<Route> routesFound = new ArrayList<>();
+        for (Solution solution : solutions) {
+            routesFound.add(constructRouteFromSolution(solution, stationLines));
         }
         return routesFound;
     }
 
-    private Set<String> commonPrefixesOf(String origin, String destination, StationLinesForDay stationLines) {
-        Set<String> prefixesOfOrigin = stationLines.getStationPrefixesOfStationName(origin);
-        Set<String> prefixesOfDestination = stationLines.getStationPrefixesOfStationName(destination);
-        Set<String> commonPrefixes = new HashSet<>(prefixesOfOrigin);
-        commonPrefixes.retainAll(prefixesOfDestination);
+    private Route constructRouteFromSolution(Solution solution, StationLinesForDay stationLines) {
+        List<String> sequence = new ArrayList<>();
+        List<String> path = solution.getPath();
+        int p = 0;
+        while (p < path.size()) {
+            List<String> stationNamesForSubsequence = new ArrayList<>();
+            String stationName = path.get(p);
+            Set<String> commonPrefixes = stationLines.getStationPrefixesOfStationName(stationName);
+            stationNamesForSubsequence.add(stationName);
+            p++;
+            while (p < path.size()) {
+                stationName = path.get(p);
+                Set<String> newCommonPrefixes = commonPrefixesOf(commonPrefixes, stationName, stationLines);
+                if (newCommonPrefixes.isEmpty()) {
+                    if (stationNamesForSubsequence.size() == 1) {
+                        throw new IllegalStateException(String.format(
+                                "For a valid solution, two stations in a route must share a line. " +
+                                        "Stations violating property: (%s,%s)",
+                                stationNamesForSubsequence.get(0), stationName));
+                    }
+                    break;
+                }
+                commonPrefixes = newCommonPrefixes;
+                stationNamesForSubsequence.add(stationName);
+                p++;
+            }
+            String prefix = commonPrefixes.stream().findAny().get();
+            for (String name : stationNamesForSubsequence) {
+                StationCode stationCode = stationLines.getStationCodeOfStationNameWithPrefix(name, prefix);
+                sequence.add(stationCode.toStationCodeString());
+            }
+        }
+        return new Route(sequence);
+    }
+
+    private Set<String> commonPrefixesOf(Set<String> prefixes, String stationName, StationLinesForDay stationLines) {
+        Set<String> stationPrefixes = stationLines.getStationPrefixesOfStationName(stationName);
+        Set<String> commonPrefixes = new HashSet<>(prefixes);
+        commonPrefixes.retainAll(stationPrefixes);
         return commonPrefixes;
     }
 }
