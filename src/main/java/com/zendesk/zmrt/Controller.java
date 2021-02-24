@@ -26,7 +26,8 @@ public class Controller {
                                      @RequestParam("start-datetime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                                                  LocalDateTime startDateTime) {
         List<Route> routesFound = new ArrayList<>();
-        if (Objects.equals(origin, "Redhill") && Objects.equals(destination, "Tiong Bahru")) {
+        if (!startDateTime.isBefore(LocalDateTime.of(1988, 3, 12, 0, 0))
+                && Objects.equals(origin, "Redhill") && Objects.equals(destination, "Tiong Bahru")) {
             List<String> sequence = new ArrayList<>();
             sequence.add("EW18");
             sequence.add("EW17");
