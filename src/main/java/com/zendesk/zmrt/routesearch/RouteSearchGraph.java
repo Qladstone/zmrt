@@ -1,13 +1,29 @@
 package com.zendesk.zmrt.routesearch;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import lombok.Getter;
+
+import java.util.*;
 
 public class RouteSearchGraph {
 
     private final Map<String, Vertex> vertices = new HashMap<>();
+
+    public List<Solution> goalSearch(String startVertexName, String goalVertexName) {
+        List<Solution> solutions = new ArrayList<>();
+        if (!vertices.containsKey(startVertexName) || !vertices.containsKey(goalVertexName)) {
+            return solutions;
+        }
+        Vertex start = vertices.get(startVertexName);
+        Vertex goal = vertices.get(goalVertexName);
+        // dummy algorithm
+        if (start.neighbours.contains(goal)) {
+            Solution solution = new Solution();
+            solution.path.add(startVertexName);
+            solution.path.add(goalVertexName);
+            solutions.add(solution);
+        }
+        return solutions;
+    }
 
     public boolean contains(String vertexName) {
         return vertices.containsKey(vertexName);
@@ -35,6 +51,11 @@ public class RouteSearchGraph {
         Vertex vertexJ = vertices.get(vertexNameJ);
         vertexI.neighbours.add(vertexJ);
         vertexJ.neighbours.add(vertexI);
+    }
+
+    @Getter
+    public static class Solution {
+        private final List<String> path = new ArrayList<>();
     }
 
     private static class Vertex {
