@@ -12,8 +12,7 @@ import java.time.format.DateTimeParseException;
 
 @Component
 public class DataLoader {
-    public StationsWithSchedule loadData(String filePath, boolean withHeader, DateTimeFormatter dateTimeFormatter)
-            throws IOException {
+    public StationsWithSchedule loadData(String filePath, boolean withHeader, DateTimeFormatter dateTimeFormatter) {
         StationsWithSchedule stations = new StationsWithSchedule();
         try (BufferedReader reader = new BufferedReader(new FileReader((filePath)))) {
             if (withHeader) reader.readLine();
@@ -31,6 +30,8 @@ public class DataLoader {
                 }
                 stations.addScheduledStation(openingDate, stationCode, stationName);
             }
+        } catch (IOException e) {
+            System.out.println("Failed to read data file: " + e);
         }
         return stations;
     }

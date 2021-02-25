@@ -7,13 +7,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class StationsWithSchedule {
 
     private final List<ScheduledStation> scheduledStations = new ArrayList<>();
-
     public void addScheduledStation(LocalDate openingDate, StationCode stationCode, String stationName) {
         scheduledStations.add(new ScheduledStation(openingDate, stationCode, stationName));
     }
@@ -35,4 +35,12 @@ public class StationsWithSchedule {
         private final StationCode stationCode;
         private final String stationName;
     }
+
+    public static StationsWithSchedule getInstance() {
+        return INSTANCE;
+    }
+
+    private static final StationsWithSchedule INSTANCE =
+            new DataLoader().loadData(
+                    "StationMap.csv", true, DateTimeFormatter.ofPattern("d MMMM yyyy"));
 }

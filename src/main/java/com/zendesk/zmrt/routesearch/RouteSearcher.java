@@ -7,9 +7,7 @@ import com.zendesk.zmrt.routesearch.StationLinesForDay.StationInLine;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,20 +25,9 @@ public class RouteSearcher {
     }
 
     public List<Route> searchForRoutes(String origin, String destination, LocalDateTime startDateTime) {
-        StationLinesForDay stationLines = constructStationLines(startDateTime);
+        StationLinesForDay stationLines = StationsWithSchedule.getInstance()
+                .constructStationLinesFor(startDateTime.toLocalDate());
         return searchForRoutesInLines(origin, destination, stationLines);
-    }
-
-    private StationLinesForDay constructStationLines(LocalDateTime startDateTime) {
-
-        StationsWithSchedule stationsWithSchedule;
-        try {
-            stationsWithSchedule = dataLoader.loadData("StationMap.csv", true, DateTimeFormatter.ofPattern("d MMMM yyyy"));
-        } catch (IOException e) {
-            System.out.println("Failed to read data file: " + e);
-            return new StationLinesForDay();
-        }
-        return stationsWithSchedule.constructStationLinesFor(startDateTime.toLocalDate());
     }
 
     private List<Route> searchForRoutesInLines(String origin, String destination, StationLinesForDay stationLines) {
