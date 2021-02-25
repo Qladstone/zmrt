@@ -7,22 +7,50 @@ import java.util.*;
 public class RouteSearchGraph {
 
     private final Map<String, Vertex> vertices = new HashMap<>();
+    private final Vertex sentinel = new Vertex(null);
 
     public List<Solution> goalSearch(String startVertexName, String goalVertexName) {
         List<Solution> solutions = new ArrayList<>();
         if (!vertices.containsKey(startVertexName) || !vertices.containsKey(goalVertexName)) {
             return solutions;
         }
+        breadthFirstGoalSearch(startVertexName, goalVertexName).ifPresent(solutions::add);
+        return solutions;
+    }
+
+    public Optional<Solution> breadthFirstGoalSearch(String startVertexName, String goalVertexName) {
+        if (!vertices.containsKey(startVertexName) || !vertices.containsKey(goalVertexName)) {
+            return Optional.empty();
+        }
+        Deque<Vertex> queue = new ArrayDeque<>();
         Vertex start = vertices.get(startVertexName);
         Vertex goal = vertices.get(goalVertexName);
-        // dummy algorithm
-        if (start.neighbours.contains(goal)) {
-            Solution solution = new Solution();
-            solution.path.add(startVertexName);
-            solution.path.add(goalVertexName);
-            solutions.add(solution);
+        start.pred = sentinel;
+        queue.add(start);
+        while (!queue.isEmpty()) {
+            Vertex current = queue.remove();
+            if (current == goal) {
+                return Optional.of(buildSolutionFromGoalVertex(goal));
+            }
+            for (Vertex neighbour : current.neighbours) {
+                if (neighbour.pred != null) continue; // skip vertices that have already been visited
+                neighbour.pred = current;
+                queue.add(neighbour);
+            }
         }
-        return solutions;
+        return Optional.empty();
+    }
+
+    private Solution buildSolutionFromGoalVertex(Vertex goal) {
+        Solution solution = new Solution();
+        Deque<String> stack = new ArrayDeque<>(); // for reversing the order
+        Vertex current = goal;
+        while (current != sentinel) {
+            stack.push(current.name);
+            current = current.pred;
+        }
+        solution.path.addAll(stack);
+        return solution;
     }
 
     public boolean contains(String vertexName) {
@@ -61,6 +89,8 @@ public class RouteSearchGraph {
     private static class Vertex {
         private final String name; // vertex/station name
         private final Set<Vertex> neighbours = new HashSet<>();
+
+        private Vertex pred = null; // predecessor on the path
 
         private Vertex(String name) {
             this.name = name;
