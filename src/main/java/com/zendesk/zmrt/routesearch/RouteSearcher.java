@@ -1,7 +1,7 @@
 package com.zendesk.zmrt.routesearch;
 
 import com.zendesk.zmrt.routesearch.RouteSearchGraph.Solution;
-import com.zendesk.zmrt.routesearch.StationLinesForDay.StationCode;
+import com.zendesk.zmrt.common.StationCode;
 import com.zendesk.zmrt.routesearch.StationLinesForDay.StationInLine;
 import org.springframework.stereotype.Component;
 

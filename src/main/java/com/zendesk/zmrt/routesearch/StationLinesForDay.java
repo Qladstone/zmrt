@@ -1,5 +1,6 @@
 package com.zendesk.zmrt.routesearch;
 
+import com.zendesk.zmrt.common.StationCode;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,10 +19,10 @@ public class StationLinesForDay {
     }
 
     public void addStation(String stationName, StationCode stationCode) {
-        if (!stationLines.containsKey(stationCode.prefix)) {
-            stationLines.put(stationCode.prefix, new ArrayList<>());
+        if (!stationLines.containsKey(stationCode.getPrefix())) {
+            stationLines.put(stationCode.getPrefix(), new ArrayList<>());
         }
-        stationLines.get(stationCode.prefix).add(new StationInLine(stationName, stationCode.suffix));
+        stationLines.get(stationCode.getPrefix()).add(new StationInLine(stationName, stationCode.getSuffix()));
         isSorted = false;
         if (!stationCodesOfStationNames.containsKey(stationName)) {
             stationCodesOfStationNames.put(stationName, new HashSet<>());
@@ -53,7 +54,7 @@ public class StationLinesForDay {
 
     public StationCode getStationCodeOfStationNameWithPrefix(String stationName, String prefix) {
         for (StationCode stationCode : stationCodesOfStationNames.get(stationName)) {
-            if (stationCode.prefix.equals(prefix)) return stationCode;
+            if (stationCode.getPrefix().equals(prefix)) return stationCode;
         }
         throw new IllegalArgumentException(stationName + " does not have a station code with prefix " + prefix);
     }
@@ -73,20 +74,4 @@ public class StationLinesForDay {
         private final int stationCodeSuffix;
     }
 
-    @Getter
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    public static class StationCode {
-        private final String prefix;
-        private final int suffix;
-
-        public String toStationCodeString() {
-            return prefix + suffix;
-        }
-
-        public static StationCode of(String stationCodeString) {
-            String prefix = stationCodeString.substring(0, 2);
-            int suffix = Integer.parseInt(stationCodeString.substring(2, stationCodeString.length()));
-            return new StationCode(prefix, suffix);
-        }
-    }
 }
