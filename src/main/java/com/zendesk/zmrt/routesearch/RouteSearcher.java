@@ -1,21 +1,28 @@
 package com.zendesk.zmrt.routesearch;
 
+import com.zendesk.zmrt.raildata.DataLoader;
+import com.zendesk.zmrt.raildata.StationsWithSchedule;
 import com.zendesk.zmrt.routesearch.RouteSearchGraph.Solution;
-import com.zendesk.zmrt.common.StationCode;
 import com.zendesk.zmrt.routesearch.StationLinesForDay.StationInLine;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class RouteSearcher {
 
+    private final DataLoader dataLoader;
     private final RouteConstructor routeConstructor;
 
     @Inject
-    public RouteSearcher(RouteConstructor routeConstructor) {
+    public RouteSearcher(DataLoader dataLoader, RouteConstructor routeConstructor) {
+        this.dataLoader = dataLoader;
         this.routeConstructor = routeConstructor;
     }
 
@@ -25,18 +32,15 @@ public class RouteSearcher {
     }
 
     private StationLinesForDay constructStationLines(LocalDateTime startDateTime) {
-        StationLinesForDay stationLines = new StationLinesForDay();
-        if (!startDateTime.isBefore(LocalDateTime.of(1988, 3, 12, 0, 0))) {
-            stationLines.addStation("Redhill", StationCode.of("EW18"));
-            stationLines.addStation("Tiong Bahru", StationCode.of("EW17"));
-            stationLines.addStation("Jurong East", StationCode.of("EW24"));
+
+        StationsWithSchedule stationsWithSchedule;
+        try {
+            stationsWithSchedule = dataLoader.loadData("StationMap.csv", true, DateTimeFormatter.ofPattern("d MMMM yyyy"));
+        } catch (IOException e) {
+            System.out.println("Failed to read data file: " + e);
+            return new StationLinesForDay();
         }
-        if (!startDateTime.isBefore(LocalDateTime.of(1996, 2, 10, 0, 0))) {
-            stationLines.addStation("Yew Tee", StationCode.of("NS5"));
-            stationLines.addStation("Kranji", StationCode.of("NS7"));
-            stationLines.addStation("Jurong East", StationCode.of("NS1"));
-        }
-        return stationLines;
+        return stationsWithSchedule.constructStationLinesFor(startDateTime.toLocalDate());
     }
 
     private List<Route> searchForRoutesInLines(String origin, String destination, StationLinesForDay stationLines) {
