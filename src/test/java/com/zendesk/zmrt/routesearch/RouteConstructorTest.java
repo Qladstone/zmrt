@@ -1,5 +1,6 @@
 package com.zendesk.zmrt.routesearch;
 
+import com.zendesk.zmrt.common.StationCode;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,12 +23,12 @@ class RouteConstructorTest {
         routeConstructor = new RouteConstructor();
 
         stationLines = new StationLinesForDay();
-        stationLines.addStation("Tiong Bahru", StationLinesForDay.StationCode.of("EW17"));
-        stationLines.addStation("Redhill", StationLinesForDay.StationCode.of("EW18"));
-        stationLines.addStation("Jurong East", StationLinesForDay.StationCode.of("EW24"));
-        stationLines.addStation("Jurong East", StationLinesForDay.StationCode.of("NS1"));
-        stationLines.addStation("Yew Tee", StationLinesForDay.StationCode.of("NS5"));
-        stationLines.addStation("Kranji", StationLinesForDay.StationCode.of("NS7"));
+        stationLines.addStation("Tiong Bahru", StationCode.of("EW17"));
+        stationLines.addStation("Redhill", StationCode.of("EW18"));
+        stationLines.addStation("Jurong East", StationCode.of("EW24"));
+        stationLines.addStation("Jurong East", StationCode.of("NS1"));
+        stationLines.addStation("Yew Tee", StationCode.of("NS5"));
+        stationLines.addStation("Kranji", StationCode.of("NS7"));
     }
 
     @Test
