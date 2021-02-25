@@ -35,9 +35,4 @@ public class DataLoader {
         }
         return stations;
     }
-
-    public static void main(String[] args) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
-        System.out.println(LocalDate.parse("12 January 2008", formatter));
-    }
 }
